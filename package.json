@@ -2,8 +2,10 @@
   "name": "api-code-mbw",
   "version": "1.0.0",
   "main": "index.js",
+  "engines": {  "node": "22.10"},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node build.js"
   },
   "keywords": [],
   "author": "",
