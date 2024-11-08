@@ -5,21 +5,20 @@ const db = require('../db');
 
 // Crear una nueva bicicleta
 router.post('/', (req, res) => {
-  const { brand, model, price, stock, categoryId } = req.body;
+  const { title, description, price, imageUrl } = req.body;
 
-  const query = 'INSERT INTO bikes (brand, model, price, stock, categoryId) VALUES (?, ?, ?, ?, ?)';
-  db.query(query, [brand, model, price, stock, categoryId], (err, results) => {
+  const query = 'INSERT INTO bikes (title, description, price, imageUrl, categoryId) VALUES (?, ?, ?, ?, ?)';
+  db.query(query, [title, description, price, imageUrl, 1], (err, results) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ message: 'Error al crear la bicicleta' });
     }
     res.status(201).json({
       id: results.insertId,
-      brand,
-      model,
+      title,
+      description,
       price,
-      stock,
-      categoryId,
+      imageUrl
     });
   });
 });
@@ -30,7 +29,7 @@ router.get('/', (req, res) => {
   db.query(query, (err, results) => {
     if (err) {
       console.error(err);
-      return res.status(500).json({ message: 'Error al obtener las bicicletas' });
+      return res.status(500).json({ message: err });
     }
     res.json(results);
   });
