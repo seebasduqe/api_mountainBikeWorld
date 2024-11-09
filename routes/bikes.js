@@ -52,10 +52,10 @@ router.get('/:id', (req, res) => {
 
 // Actualizar una bicicleta
 router.put('/:id', (req, res) => {
-  const { brand, model, price, stock, categoryId } = req.body;
+  const { title, description, price, imageUrl } = req.body;
 
-  const query = 'UPDATE bikes SET brand = ?, model = ?, price = ?, stock = ?, categoryId = ? WHERE id = ?';
-  db.query(query, [brand, model, price, stock, categoryId, req.params.id], (err, results) => {
+  const query = 'UPDATE bikes SET title = ?, description = ?, price = ?, imageUrl = ? WHERE id = ?';
+  db.query(query, [title, description, price, imageUrl, req.params.id], (err, results) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ message: 'Error al actualizar la bicicleta' });
@@ -65,11 +65,10 @@ router.put('/:id', (req, res) => {
     }
     res.json({
       id: req.params.id,
-      brand,
-      model,
+      title,
+      description,
       price,
-      stock,
-      categoryId,
+      imageUrl,
     });
   });
 });
