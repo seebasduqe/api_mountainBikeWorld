@@ -1,66 +1,72 @@
 // routes/bikes.js
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const Database = require('../singlenton_db');
+const db = Database.instance;
 
 // Crear una nueva bicicleta
-router.post('/', (req, res) => {
-  const { title, description, price, imageUrl } = req.body;
+router.post('/', async (req, res) => {
+  const { title, description, price, imageUrl, categoryId = 1 } = req.body; // Default categoryId to 1 if not provided
 
-  const query = 'INSERT INTO bikes (title, description, price, imageUrl, categoryId) VALUES (?, ?, ?, ?, ?)';
-  db.query(query, [title, description, price, imageUrl, 1], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error al crear la bicicleta' });
-    }
+  const insertQuery = `
+    INSERT INTO bikes (title, description, price, imageUrl, categoryId)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+  try {
+    const result = await db.fetchData(insertQuery, [title, description, price, imageUrl, categoryId]);
     res.status(201).json({
-      id: results.insertId,
+      id: result.insertId,
       title,
       description,
       price,
-      imageUrl
+      imageUrl,
+      categoryId
     });
-  });
+  } catch (error) {
+    console.error('Error creating bike:', error);
+    res.status(500).json({ message: 'Error al crear la bicicleta' });
+  }
 });
 
 // Obtener todas las bicicletas
-router.get('/', (req, res) => {
-  const query = 'SELECT * FROM bikes';
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: err });
-    }
+router.get('/', async (req, res) => {
+  const selectQuery = 'SELECT * FROM bikes';
+  try {
+    const results = await db.fetchData(selectQuery, []);
     res.json(results);
-  });
+  } catch (error) {
+    console.error('Error fetching bikes:', error);
+    res.status(500).json({ message: 'Error al obtener las bicicletas' });
+  }
 });
 
 // Obtener una bicicleta por ID
-router.get('/:id', (req, res) => {
-  const query = 'SELECT * FROM bikes WHERE id = ?';
-  db.query(query, [req.params.id], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error al obtener la bicicleta' });
-    }
+router.get('/:id', async (req, res) => {
+  const selectQuery = 'SELECT * FROM bikes WHERE id = ?';
+  try {
+    const results = await db.fetchData(selectQuery, [req.params.id]);
     if (results.length === 0) {
       return res.status(404).json({ message: 'Bicicleta no encontrada' });
     }
     res.json(results[0]);
-  });
+  } catch (error) {
+    console.error('Error fetching bike by id:', error);
+    res.status(500).json({ message: 'Error al obtener la bicicleta' });
+  }
 });
 
 // Actualizar una bicicleta
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const { title, description, price, imageUrl } = req.body;
 
-  const query = 'UPDATE bikes SET title = ?, description = ?, price = ?, imageUrl = ? WHERE id = ?';
-  db.query(query, [title, description, price, imageUrl, req.params.id], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error al actualizar la bicicleta' });
-    }
-    if (results.affectedRows === 0) {
+  const updateQuery = `
+    UPDATE bikes
+    SET title = ?, description = ?, price = ?, imageUrl = ?
+    WHERE id = ?
+  `;
+  try {
+    const result = await db.fetchData(updateQuery, [title, description, price, imageUrl, req.params.id]);
+    if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Bicicleta no encontrada' });
     }
     res.json({
@@ -70,22 +76,25 @@ router.put('/:id', (req, res) => {
       price,
       imageUrl,
     });
-  });
+  } catch (error) {
+    console.error('Error updating bike:', error);
+    res.status(500).json({ message: 'Error al actualizar la bicicleta' });
+  }
 });
 
 // Eliminar una bicicleta
-router.delete('/:id', (req, res) => {
-  const query = 'DELETE FROM bikes WHERE id = ?';
-  db.query(query, [req.params.id], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error al eliminar la bicicleta' });
-    }
-    if (results.affectedRows === 0) {
+router.delete('/:id', async (req, res) => {
+  const deleteQuery = 'DELETE FROM bikes WHERE id = ?';
+  try {
+    const result = await db.fetchData(deleteQuery, [req.params.id]);
+    if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Bicicleta no encontrada' });
     }
     res.json({ message: 'Bicicleta eliminada' });
-  });
+  } catch (error) {
+    console.error('Error deleting bike:', error);
+    res.status(500).json({ message: 'Error al eliminar la bicicleta' });
+  }
 });
 
 module.exports = router;

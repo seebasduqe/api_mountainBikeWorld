@@ -2,7 +2,9 @@
   "name": "api-code-mbw",
   "version": "1.0.0",
   "main": "index.js",
-  "engines": {  "node": "22.10"},
+  "engines": {
+    "node": "22.10"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node build.js"
@@ -15,7 +17,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "mysql2": "^3.11.3",
+    "mysql2": "^3.11.5",
     "sequelize": "^6.37.5"
   }
 }

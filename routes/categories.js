@@ -1,79 +1,79 @@
-// routes/categories.js
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const Database = require('../singlenton_db');
+const db = Database.instance;
 
 // Crear una nueva categoría
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { name, description } = req.body;
 
   const query = 'INSERT INTO categories (name, description) VALUES (?, ?)';
-  db.query(query, [name, description], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error al crear la categoría' });
-    }
-    res.status(201).json({ id: results.insertId, name, description });
-  });
+  try {
+    const result = await db.fetchData(query, [name, description]);
+    res.status(201).json({ id: result.insertId, name, description });
+  } catch (error) {
+    console.error('Error creating category:', error);
+    res.status(500).json({ message: 'Error al crear la categoría' });
+  }
 });
 
 // Obtener todas las categorías
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const query = 'SELECT * FROM categories';
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error al obtener las categorías' });
-    }
+  try {
+    const results = await db.fetchData(query, []);
     res.json(results);
-  });
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ message: 'Error al obtener las categorías' });
+  }
 });
 
 // Obtener una categoría por ID
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   const query = 'SELECT * FROM categories WHERE id = ?';
-  db.query(query, [req.params.id], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error al obtener la categoría' });
-    }
+  try {
+    const results = await db.fetchData(query, [req.params.id]);
     if (results.length === 0) {
       return res.status(404).json({ message: 'Categoría no encontrada' });
     }
     res.json(results[0]);
-  });
+  } catch (error) {
+    console.error('Error fetching category by id:', error);
+    res.status(500).json({ message: 'Error al obtener la categoría' });
+  }
 });
 
 // Actualizar una categoría
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const { name, description } = req.body;
 
   const query = 'UPDATE categories SET name = ?, description = ? WHERE id = ?';
-  db.query(query, [name, description, req.params.id], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error al actualizar la categoría' });
-    }
-    if (results.affectedRows === 0) {
+  try {
+    const result = await db.fetchData(query, [name, description, req.params.id]);
+    if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Categoría no encontrada' });
     }
     res.json({ id: req.params.id, name, description });
-  });
+  } catch (error) {
+    console.error('Error updating category:', error);
+    res.status(500).json({ message: 'Error al actualizar la categoría' });
+  }
 });
 
 // Eliminar una categoría
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const query = 'DELETE FROM categories WHERE id = ?';
-  db.query(query, [req.params.id], (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error al eliminar la categoría' });
-    }
-    if (results.affectedRows === 0) {
+  try {
+    const result = await db.fetchData(query, [req.params.id]);
+    if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Categoría no encontrada' });
     }
     res.json({ message: 'Categoría eliminada' });
-  });
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    res.status(500).json({ message: 'Error al eliminar la categoría' });
+  }
 });
 
 module.exports = router;
